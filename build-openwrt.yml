@@ -1,0 +1,68 @@
+name: Build-OpenWrt
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      ssh:
+        description: 'SSH连接'
+        required: false
+        default: 'false'
+
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    if: github.event.repository.owner.id == github.event.sender.id
+
+    steps:
+    - name: Clone Repository
+      uses: actions/checkout@v2
+    - name: 初始化编译依赖项
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq full-upgrade
+        sudo apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget curl swig rsync
+        for i in $(ls /usr/bin/*-8); do sudo -E ln -sf $i ${i%%-8*}; done 
+        sudo -E ln -sf /usr/include/asm-generic /usr/include/asm
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo -E swapoff -a
+        sudo -E rm -rf /usr/share/dotnet /etc/mysql /etc/php /usr/local/lib/android /opt/ghc /swapfile
+    - name: 运行自定义文件（克隆源码、设置、添加软件包）
+      run: |
+        cd /home/runner
+        #获取openwrt库地址
+        git clone "https://github.com/coolsnowwolf/lede.git"
+        #直接跳转到lede目录
+        pushd "lede"; 
+        #指定版本
+        git reset --hard 20200408
+
+        #改登录IP地址 改闪存大小
+        sed -i -e 's/192.168.1.1/192.168.1.11/g' -e 's/OpenWrt/TPLink_WR703Nv1/g' package/base-files/files/bin/config_generate
+        sed -i '364s/4/16/g' target/linux/ar71xx/image/tiny-tp-link.mk
+
+        #添加需要的软件包
+        echo 'src-git passwall https://github.com/songchenwen/openwrt-package.git' >>feeds.conf.default
+
+        ./scripts/feeds update -a -f
+        ./scripts/feeds install -a -f
+        popd
+
+        sudo chown -R runner:runner lede
+
+    - name: SSH连接
+      uses: P3TERX/ssh2actions@v1.0.0
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      env:
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+
+    - name: 上传程序包
+      uses: actions/upload-artifact@v2
+      with:
+        name: Packages
+        path: /home/runner/lede/.config
