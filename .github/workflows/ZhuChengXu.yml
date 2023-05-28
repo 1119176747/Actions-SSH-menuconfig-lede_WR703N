@@ -35,11 +35,12 @@ jobs:
       run: |
         cd /home/runner
         #获取openwrt库地址
-        git clone "https://github.com/coolsnowwolf/lede.git"
+        #git clone "https://github.com/coolsnowwolf/lede.git"
+        git clone "https://github.com/coolsnowwolf/lede.git" -b "master" lede
         #直接跳转到lede目录
         pushd "lede"; 
         #指定版本
-        git reset --hard master
+        #git reset --hard master
 
         #改登录IP地址 改闪存大小
         sed -i -e 's/192.168.1.1/192.168.1.11/g' -e 's/OpenWrt/TPLink_WR703Nv1/g' package/base-files/files/bin/config_generate
