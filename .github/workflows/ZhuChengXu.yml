@@ -39,14 +39,19 @@ jobs:
         #直接跳转到lede目录
         pushd "lede"; 
         #指定版本
-        git reset --hard master
+        git reset --hard d2c2435b0d340268c73cecd1fd0f627c89515270
 
         #改登录IP地址 改闪存大小
         #sed -i -e 's/192.168.1.1/192.168.1.11/g' -e 's/OpenWrt/TPLink_WR703Nv1/g' package/base-files/files/bin/config_generate
         #sed -i '364s/4/16/g' target/linux/ar71xx/image/tiny-tp-link.mk
 
         #添加需要的软件包
-        echo 'src-git passwall https://github.com/songchenwen/openwrt-package.git' >>feeds.conf.default
+        #echo 'src-git passwall https://github.com/songchenwen/openwrt-package.git' >>feeds.conf.default
+        sed -i 's/^#\(.*helloworld\)/\1/' feeds.conf.default
+        sed -i -e '1s/$/^e82d730/g' feeds.conf.default
+        sed -i -e '2s/$/^974fb04/g' feeds.conf.default
+        sed -i -e '3s/$/^54fd237/g' feeds.conf.default
+        sed -i -e '4s/$/^2071d9f/g' feeds.conf.default
 
         ./scripts/feeds update -a -f
         ./scripts/feeds install -a -f
