@@ -39,7 +39,7 @@ jobs:
         #直接跳转到lede目录
         pushd "lede"; 
         #指定版本
-        git reset --hard d2c2435b0d340268c73cecd1fd0f627c89515270
+        git reset --hard e2535799fbfa1806694a5c5699f1bbe842868771
 
         #改登录IP地址 改闪存大小
         #sed -i -e 's/192.168.1.1/192.168.1.11/g' -e 's/OpenWrt/TPLink_WR703Nv1/g' package/base-files/files/bin/config_generate
