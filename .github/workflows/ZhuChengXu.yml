@@ -46,8 +46,8 @@ jobs:
         #sed -i '364s/4/16/g' target/linux/ar71xx/image/tiny-tp-link.mk
 
         #添加需要的软件包
-        echo 'src-git passwall https://github.com/songchenwen/openwrt-package.git' >>feeds.conf.default
-        #sed -i 's/^#\(.*helloworld\)/\1/' feeds.conf.default  #使用源码自带ShadowSocksR Plus软件
+        #echo 'src-git passwall https://github.com/songchenwen/openwrt-package.git' >>feeds.conf.default
+        sed -i 's/^#\(.*helloworld\)/\1/' feeds.conf.default  #使用源码自带ShadowSocksR Plus软件
         sed -i -e '1s/$/^e82d730/g' feeds.conf.default
         sed -i -e '2s/$/^974fb04/g' feeds.conf.default
         sed -i -e '3s/$/^54fd237/g' feeds.conf.default
